@@ -146,7 +146,7 @@ sudo systemctl restart httpd
 
 
 sudo tee /etc/httpd/conf.d/phpmyadmin.conf  <<EOF
-Alias /db-erss /usr/share/phpmyadmin
+Alias /db-kdt /usr/share/phpmyadmin
 <Directory /usr/share/phpmyadmin/>
     AddDefaultCharset UTF-8
     <IfModule mod_authz_core.c>
