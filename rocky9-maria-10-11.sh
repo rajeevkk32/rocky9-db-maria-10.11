@@ -95,6 +95,7 @@ sudo sed -i "s/;date.timezone =/date.timezone = 'Asia\/Kolkata'/" /etc/php.ini
 sudo sed -i 's/^upload_max_filesize = .*/upload_max_filesize = 8M/' /etc/php.ini && sudo sed -i 's/^post_max_size = .*/post_max_size = 8M/' /etc/php.ini
 sudo systemctl restart httpd
 
+echo "PHP 8.3  installed and configured."
 
 
 # Enable MariaDB 10.11 repository
@@ -118,7 +119,7 @@ echo "Starting and enabling MariaDB service..."
 sudo systemctl start mariadb
 sudo systemctl enable mariadb
 
-
+echo "mariadb 10.11 installed"
 
 
 # Install phpMyAdmin from ZIP
@@ -196,7 +197,7 @@ sudo systemctl restart httpd
 
 sudo systemctl restart php-fpm
 
-
+echo "phpMyAdmin installed"
 
 # Restart services
 echo "Restarting services..."
@@ -222,7 +223,6 @@ FLUSH PRIVILEGES;
 EOF
 
 echo "Installation and setup completed!"
-echo "MariaDB, PHP 8.3, and phpMyAdmin are installed and configured."
 echo "Your MariaDB root password is: $ROOT_PASSWORD"
 
 
