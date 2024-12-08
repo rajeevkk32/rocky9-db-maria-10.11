@@ -100,24 +100,33 @@ echo "PHP 8.3  installed and configured."
 
 # Enable MariaDB 10.11 repository
 echo "Setting up MariaDB 10.11 repository..."
-cat <<EOF | sudo tee /etc/yum.repos.d/MariaDB.repo
-# MariaDB 10.11 CentOS repository list - created 2024-12-08
+
+
+#Mariadb: server 10.11
+
+rm -f /etc/yum.repos.d/MariaDB.repo
+cat << 'EOF' | sudo tee /etc/yum.repos.d/MariaDB.repo
+# MariaDB 10.11 CentOS repository list - created 2024-04-12 10:54 UTC
+# https://mariadb.org/download/
 [mariadb]
 name = MariaDB
-baseurl = https://downloads.mariadb.com/MariaDB/mariadb-10.11/yum/centos9-amd64
-gpgkey=https://downloads.mariadb.com/MariaDB/MariaDB-Server-GPG-KEY
-gpgcheck=1
-enabled=1
+baseurl = "https://mariadb.gb.ssimn.org/yum/10.11/centos/$releasever/$basearch"
+gpgkey = https://mariadb.gb.ssimn.org/yum/RPM-GPG-KEY-MariaDB
+gpgcheck = 1
 EOF
+
 
 # Install MariaDB 10.11
 echo "Installing MariaDB 10.11..."
-sudo dnf install MariaDB-server MariaDB-client -y
+sudo dnf install MariaDB-server MariaDB-client mariadb-backup  -y
 
 # Start and enable MariaDB service
 echo "Starting and enabling MariaDB service..."
-sudo systemctl start mariadb
-sudo systemctl enable mariadb
+systemctl start mariadb
+systemctl enable mariadb
+systemctl restart mariadb
+
+
 
 echo "mariadb 10.11 installed"
 
@@ -207,26 +216,6 @@ sudo systemctl restart httpd
 
 
 
-# Generate a 16-character random password
-ROOT_PASSWORD=$(openssl rand -base64 12)
-echo "Generated MariaDB Root Password: $ROOT_PASSWORD"
-
-
-# Secure MariaDB installation
-echo "Securing MariaDB installation..."
-sudo mysql <<EOF
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$ROOT_PASSWORD');
-DELETE FROM mysql.user WHERE User='';
-DROP DATABASE IF EXISTS test;
-DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-FLUSH PRIVILEGES;
-EOF
-
-echo "Installation and setup completed!"
-echo "Your MariaDB root password is: $ROOT_PASSWORD"
-
-
-
 #csf:
 cd /tmp
 yum install wget iptables -y
@@ -239,8 +228,35 @@ sudo sh install.sh
 perl csftest.pl
 
 
- netstat -tlpn
 
+
+
+# Generate a random 16-character root password
+ROOT_PASSWORD=$(openssl rand -base64 12)
+echo "Generated MariaDB Root Password: $ROOT_PASSWORD"
+
+# Automate the secure installation
+sudo mysql <<EOF
+-- Set the root password
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$ROOT_PASSWORD';
+
+-- Remove anonymous users
+DELETE FROM mysql.user WHERE User='';
+
+-- Disallow root login remotely
+DELETE FROM mysql.user WHERE User='root' AND Host!='localhost';
+
+-- Remove the test database
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+
+-- Reload privilege tables
+FLUSH PRIVILEGES;
+EOF
+
+echo "MariaDB secure installation completed."
+echo "Root password: $ROOT_PASSWORD"
+
+netstat -tlpn
 
 echo "final script end"
-echo "Generated MariaDB Root Password: $ROOT_PASSWORD"
